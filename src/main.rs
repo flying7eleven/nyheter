@@ -9,7 +9,18 @@ struct NyheterCategory {
 struct NyheterNewsEntry {
     title: String,
     description: String,
-    category: Vec<NyheterCategory>,
+    categories: Vec<NyheterCategory>,
+}
+
+impl NyheterNewsEntry {
+    pub fn get_short_description(&self) -> String {
+        let mut short_description = self.description.clone();
+        if short_description.chars().count() >= 100 {
+            short_description.split_off(100 - 3);
+            return format!("{}...", short_description);
+        }
+        short_description
+    }
 }
 
 impl FromStr for NyheterCategory {
@@ -25,6 +36,17 @@ impl FromStr for NyheterCategory {
 impl Debug for NyheterCategory {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
         f.write_str(self.raw_name.as_str())
+    }
+}
+
+impl Debug for NyheterNewsEntry {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
+        f.write_fmt(format_args!(
+            "{} :: {} :: {:?}",
+            self.title,
+            self.get_short_description(),
+            self.categories
+        ))
     }
 }
 
@@ -54,7 +76,12 @@ fn main() {
 
         for item in foo.items() {
             let categories = get_enhanced_categories(item.categories());
-            println!("{:?}", categories);
+            let new_entry = NyheterNewsEntry {
+                title: item.title().unwrap().to_string(),
+                description: item.description().unwrap().to_string(),
+                categories,
+            };
+            println!("{:?}", new_entry);
         }
     }
 }
