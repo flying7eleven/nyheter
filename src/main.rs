@@ -1,3 +1,5 @@
+use lazy_static::lazy_static;
+use regex::Regex;
 use rss::{Category, Channel};
 use std::fmt::{Debug, Error, Formatter};
 use std::str::FromStr;
@@ -14,7 +16,17 @@ struct NyheterNewsEntry {
 
 impl NyheterNewsEntry {
     pub fn get_short_description(&self) -> String {
+        lazy_static! {
+            static ref RE: Regex = Regex::new("<[^>]*(>|$)").unwrap();
+        }
         let mut short_description = self.description.clone();
+
+        // remove linebreaks, HTML and then trim the text
+        short_description = short_description.replace("\n", "");
+        short_description = RE.replace(short_description.as_str(), "").to_string();
+        short_description = short_description.to_owned().trim().to_string();
+
+        // ensure the description is not more than 100 characters
         if short_description.chars().count() >= 100 {
             short_description = short_description
                 .chars()
@@ -64,6 +76,7 @@ fn get_enhanced_categories(input: &[Category]) -> Vec<NyheterCategory> {
 
 fn main() {
     let input_feeds = vec![
+        "https://www.aerotelegraph.com/feed".to_string(),
         "https://feeds2.feedburner.com/stadt-bremerhaven/dqXM".to_string(),
         "https://rp-online.de/nrw/staedte/duesseldorf/feed.rss".to_string(),
         "https://www.tagesschau.de/xml/rss2".to_string(),

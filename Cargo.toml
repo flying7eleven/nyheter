@@ -9,3 +9,5 @@ edition = "2018"
 [dependencies]
 rss = {version= "*", features = ['from_url']}
 serde_json = "*"
+regex = "*"
+lazy_static = "*"
