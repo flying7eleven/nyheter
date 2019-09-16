@@ -16,7 +16,11 @@ impl NyheterNewsEntry {
     pub fn get_short_description(&self) -> String {
         let mut short_description = self.description.clone();
         if short_description.chars().count() >= 100 {
-            short_description.split_off(100 - 3);
+            short_description = short_description
+                .chars()
+                .into_iter()
+                .take(100 - 3)
+                .collect();
             return format!("{}...", short_description);
         }
         short_description
